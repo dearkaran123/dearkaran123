@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Workshop;
+use App\Models\MenuItem;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -11,7 +13,8 @@ use Illuminate\Support\Facades\Date;
 
 class EventsController extends BaseController
 {
-    /*
+	
+	/*
      Requirements:
     - maximum 2 sql queries
     - verify your solution with `php artisan test`
@@ -97,7 +100,21 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 1');
+        //$result = Event::join("workshops as w", "w.event_id", "=", "events.id")->orderBy('a.id', 'desc')->get()->toArray();
+		$result = Event::get()->toArray();
+		$i = 0;
+		foreach($result as $res) {
+			$result[$i]['workshops'] = array();
+			$resWorkshop = Workshop::where('event_id','=',$res['id'])->get()->toArray();
+			if(count($resWorkshop) > 0) {
+				$result[$i]['workshops'] = $resWorkshop;
+			}
+			$i++;
+		}
+		//echo '<pre>';print_r($result);
+		return json_encode($result);
+		
+		throw new \Exception('implement in coding task 1');
     }
 
 
@@ -176,6 +193,10 @@ class EventsController extends BaseController
      */
 
     public function getFutureEventsWithWorkshops() {
-        throw new \Exception('implement in coding task 2');
+        //$result = Event::join("workshops as w", "w.event_id", "=", "events.id")->orderBy('a.id', 'desc')->get()->toArray();
+		$result = Event::where('id','!=',0)->orderBy('id', 'desc')->get()->toArray();
+		echo '<pre>';print_r($result);
+		
+		throw new \Exception('implement in coding task 2');
     }
 }
