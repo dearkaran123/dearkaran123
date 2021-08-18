@@ -100,8 +100,7 @@ class EventsController extends BaseController
      */
 
     public function getEventsWithWorkshops() {
-        //$result = Event::join("workshops as w", "w.event_id", "=", "events.id")->orderBy('a.id', 'desc')->get()->toArray();
-		$result = Event::get()->toArray();
+        $result = Event::get()->toArray();
 		$i = 0;
 		foreach($result as $res) {
 			$result[$i]['workshops'] = array();
@@ -193,9 +192,22 @@ class EventsController extends BaseController
      */
 
     public function getFutureEventsWithWorkshops() {
-        //$result = Event::join("workshops as w", "w.event_id", "=", "events.id")->orderBy('a.id', 'desc')->get()->toArray();
-		$result = Event::where('id','!=',0)->orderBy('id', 'desc')->get()->toArray();
-		echo '<pre>';print_r($result);
+        $result = Event::join("workshops", "workshops.event_id", "=", "events.id")
+					->select('events.*')
+					->where( \DB::raw('now()'), '<=', \DB::raw('workshops.start') )
+					->groupBy('events.id')
+					->get()->toArray();
+		$i = 0;
+		foreach($result as $res) {
+			$result[$i]['workshops'] = array();
+			$resWorkshop = Workshop::where('event_id','=',$res['id'])->get()->toArray();
+			if(count($resWorkshop) > 0) {
+				$result[$i]['workshops'] = $resWorkshop;
+			}
+			$i++;
+		}
+		//echo '<pre>';print_r($result);
+		return json_encode($result);
 		
 		throw new \Exception('implement in coding task 2');
     }
